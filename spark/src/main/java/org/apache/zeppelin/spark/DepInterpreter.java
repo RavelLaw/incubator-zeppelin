@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.spark.repl.SparkILoop;
-import org.apache.spark.repl.SparkIMain;
-import org.apache.spark.repl.SparkJLineCompletion;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterGroup;
@@ -75,10 +73,8 @@ public class DepInterpreter extends Interpreter {
 
   }
 
-  private SparkIMain intp;
   private ByteArrayOutputStream out;
   private DependencyContext depc;
-  private SparkJLineCompletion completor;
   private SparkILoop interpreter;
 
   public DepInterpreter(Properties property) {
@@ -92,9 +88,6 @@ public class DepInterpreter extends Interpreter {
 
   @Override
   public void close() {
-    if (intp != null) {
-      intp.close();
-    }
   }
 
   @Override
@@ -129,7 +122,6 @@ public class DepInterpreter extends Interpreter {
     }
 
     pathSettings.v_$eq(classpath);
-    settings.scala$tools$nsc$settings$ScalaSettings$_setter_$classpath_$eq(pathSettings);
 
     // set classloader for scala compiler
     settings.explicitParentLoader_$eq(new Some<ClassLoader>(Thread.currentThread()
@@ -137,7 +129,6 @@ public class DepInterpreter extends Interpreter {
 
     BooleanSetting b = (BooleanSetting) settings.usejavacp();
     b.v_$eq(true);
-    settings.scala$tools$nsc$settings$StandardScalaSettings$_setter_$usejavacp_$eq(b);
 
     interpreter = new SparkILoop(null, new PrintWriter(out));
     interpreter.settings_$eq(settings);

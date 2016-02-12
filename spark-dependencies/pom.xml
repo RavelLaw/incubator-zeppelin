@@ -36,9 +36,9 @@
   
 
   <properties>
-    <spark.version>1.4.1</spark.version>
-    <scala.version>2.10.4</scala.version>
-    <scala.binary.version>2.10</scala.binary.version>
+    <spark.version>1.6.0</spark.version>
+    <scala.version>2.11.7</scala.version>
+    <scala.binary.version>2.11</scala.binary.version>
 
     <hadoop.version>2.3.0</hadoop.version>
     <yarn.version>${hadoop.version}</yarn.version>
@@ -244,7 +244,7 @@
     <!-- Spark -->
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_2.10</artifactId>
+      <artifactId>spark-core_2.11</artifactId>
       <version>${spark.version}</version>
       <exclusions>
         <exclusion>
@@ -256,13 +256,13 @@
 
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-repl_2.10</artifactId>
+      <artifactId>spark-repl_2.11</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-sql_2.10</artifactId>
+      <artifactId>spark-sql_2.11</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
@@ -275,14 +275,14 @@
 
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-streaming_2.10</artifactId>
+      <artifactId>spark-streaming_2.11</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
 
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-streaming-twitter_2.10</artifactId>
+      <artifactId>spark-streaming-twitter_2.11</artifactId>
       <version>${spark.version}</version>
     </dependency>
 
@@ -582,7 +582,7 @@
       <dependencies>
         <dependency>
           <groupId>org.apache.spark</groupId>
-          <artifactId>spark-yarn_2.10</artifactId>
+          <artifactId>spark-yarn_2.11</artifactId>
           <version>${spark.version}</version>
         </dependency>
 

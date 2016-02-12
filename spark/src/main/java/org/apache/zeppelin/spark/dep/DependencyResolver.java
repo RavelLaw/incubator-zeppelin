@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.spark.SparkContext;
-import org.apache.spark.repl.SparkIMain;
+import org.apache.spark.repl.SparkILoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.aether.RepositorySystem;
@@ -64,7 +64,7 @@ import scala.tools.nsc.util.MergedClassPath;
 public class DependencyResolver {
   Logger logger = LoggerFactory.getLogger(DependencyResolver.class);
   private Global global;
-  private SparkIMain intp;
+  private SparkILoop intp;
   private SparkContext sc;
   private RepositorySystem system = Booter.newRepositorySystem();
   private List<RemoteRepository> repos = new LinkedList<RemoteRepository>();
@@ -83,10 +83,10 @@ public class DependencyResolver {
                                                     "org.apache.zeppelin:zeppelin-spark",
                                                     "org.apache.zeppelin:zeppelin-server"};
 
-  public DependencyResolver(SparkIMain intp, SparkContext sc, String localRepoPath,
+  public DependencyResolver(SparkILoop intp, SparkContext sc, String localRepoPath,
                             String additionalRemoteRepository) {
     this.intp = intp;
-    this.global = intp.global();
+    this.global = intp.interpreter().global();
     this.sc = sc;
     session = Booter.newRepositorySystemSession(system, localRepoPath);
     repos.add(Booter.newCentralRepository()); // add maven central
@@ -164,7 +164,7 @@ public class DependencyResolver {
   private void updateRuntimeClassPath_1_x(URL[] urls) throws SecurityException,
       IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException {
-    ClassLoader cl = intp.classLoader().getParent();
+    ClassLoader cl = intp.interpreter().classLoader().getParent();
     Method addURL;
     addURL = cl.getClass().getDeclaredMethod("addURL", new Class[] {URL.class});
     addURL.setAccessible(true);
@@ -176,7 +176,7 @@ public class DependencyResolver {
   private void updateRuntimeClassPath_2_x(URL[] urls) throws SecurityException,
       IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException {
-    ClassLoader cl = intp.classLoader().getParent();
+    ClassLoader cl = intp.interpreter().classLoader().getParent();
     Method addURL;
     addURL = cl.getClass().getDeclaredMethod("addNewUrl", new Class[] {URL.class});
     addURL.setAccessible(true);
@@ -246,7 +246,7 @@ public class DependencyResolver {
   private void loadFromFs(String artifact, boolean addSparkContext) throws Exception {
     File jarFile = new File(artifact);
 
-    intp.global().new Run();
+    intp.interpreter.global().new Run();
 
     if (sc.version().startsWith("1.1")) {
       updateRuntimeClassPath_1_x(new URL[] {jarFile.toURI().toURL()});
