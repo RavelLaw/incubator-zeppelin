@@ -207,7 +207,8 @@ public class DependencyResolver {
         file = AbstractFile.getURL(url);
       }
 
-      ClassPath<AbstractFile> newcp = platform.classPath().context().newClassPath(file);
+      ClassPath<AbstractFile> newcp = (ClassPath<AbstractFile>)
+              platform.classPath().context().newClassPath(file);
 
       // distinct
       if (cp.contains(newcp) == false) {
@@ -246,7 +247,7 @@ public class DependencyResolver {
   private void loadFromFs(String artifact, boolean addSparkContext) throws Exception {
     File jarFile = new File(artifact);
 
-    intp.interpreter.global().new Run();
+    intp.intp().global().new Run();
 
     if (sc.version().startsWith("1.1")) {
       updateRuntimeClassPath_1_x(new URL[] {jarFile.toURI().toURL()});
@@ -294,7 +295,7 @@ public class DependencyResolver {
           + artifactResult.getArtifact().getVersion());
     }
 
-    intp.global().new Run();
+    intp.intp().global().new Run();
     if (sc.version().startsWith("1.1")) {
       updateRuntimeClassPath_1_x(newClassPathList.toArray(new URL[0]));
     } else {

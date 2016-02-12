@@ -17,10 +17,7 @@
 
 package org.apache.zeppelin.spark;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -56,17 +53,16 @@ import org.apache.zeppelin.spark.dep.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import scala.*;
 import scala.Console;
 import scala.Enumeration.Value;
-import scala.None;
-import scala.Some;
-import scala.Tuple2;
 import scala.collection.Iterator;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.mutable.HashMap;
 import scala.collection.mutable.HashSet;
+import scala.None$;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.interpreter.Completion.Candidates;
 import scala.tools.nsc.interpreter.Completion.ScalaCompleter;
@@ -192,7 +188,7 @@ public class SparkInterpreter extends Interpreter {
   }
 
   private boolean useHiveContext() {
-    return Boolean.parseBoolean(getProperty("zeppelin.spark.useHiveContext"));
+    return java.lang.Boolean.parseBoolean(getProperty("zeppelin.spark.useHiveContext"));
   }
 
   public SQLContext getSQLContext() {
@@ -439,7 +435,7 @@ public class SparkInterpreter extends Interpreter {
     PrintStream printStream = new PrintStream(out);
 
     /* spark interpreter */
-    this.interpreter = new SparkILoop(null, new PrintWriter(out));
+    this.interpreter = new SparkILoop(None$.<BufferedReader>empty(), new PrintWriter(out));
     interpreter.settings_$eq(settings);
 
     interpreter.createInterpreter();
@@ -544,6 +540,10 @@ public class SparkInterpreter extends Interpreter {
     return paths;
   }
 
+  @Override
+  public List<String> completion(String buf, int cursor) {
+    return new ArrayList<String>();
+  }
 
   public Object getValue(String name) {
     Object ret = interpreter.interpreter().valueOfTerm(name);
@@ -733,7 +733,8 @@ public class SparkInterpreter extends Interpreter {
 
       Method numCompletedTasks = stageUIDataClass.getMethod("numCompleteTasks");
       Set<Tuple2<Object, Object>> keys =
-              (Set<Tuple2<Object,Object>>) JavaConverters.setAsJavaSetConverter(stageIdData.keySet()).asJava();
+              (Set<Tuple2<Object, Object>>) JavaConverters.setAsJavaSetConverter(
+                      stageIdData.keySet()).asJava();
       for (Tuple2<Object, Object> k : keys) {
         if (id == (int) k._1()) {
           Object uiData = stageIdData.get(k).get();

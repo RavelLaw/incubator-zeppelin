@@ -17,17 +17,11 @@
 
 package org.apache.zeppelin.spark;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.spark.repl.SparkILoop;
 import org.apache.zeppelin.interpreter.Interpreter;
@@ -44,10 +38,12 @@ import org.sonatype.aether.resolution.DependencyResolutionException;
 
 import scala.Console;
 import scala.None;
+import scala.None$;
 import scala.Some;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.interpreter.Completion.Candidates;
 import scala.tools.nsc.interpreter.Completion.ScalaCompleter;
+import scala.tools.nsc.interpreter.IMain;
 import scala.tools.nsc.settings.MutableSettings.BooleanSetting;
 import scala.tools.nsc.settings.MutableSettings.PathSetting;
 
@@ -76,6 +72,7 @@ public class DepInterpreter extends Interpreter {
   private ByteArrayOutputStream out;
   private DependencyContext depc;
   private SparkILoop interpreter;
+  private IMain intp;
 
   public DepInterpreter(Properties property) {
     super(property);
@@ -130,7 +127,7 @@ public class DepInterpreter extends Interpreter {
     BooleanSetting b = (BooleanSetting) settings.usejavacp();
     b.v_$eq(true);
 
-    interpreter = new SparkILoop(null, new PrintWriter(out));
+    interpreter = new SparkILoop(None$.<BufferedReader>empty(), new PrintWriter(out));
     interpreter.settings_$eq(settings);
 
     interpreter.createInterpreter();
@@ -142,7 +139,6 @@ public class DepInterpreter extends Interpreter {
 
     depc = new DependencyContext(getProperty("zeppelin.dep.localrepo"),
                                  getProperty("zeppelin.dep.additionalRemoteRepository"));
-    completor = new SparkJLineCompletion(intp);
 
     intp.interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
     Map<String, Object> binder = (Map<String, Object>) getValue("_binder");
@@ -223,9 +219,7 @@ public class DepInterpreter extends Interpreter {
 
   @Override
   public List<String> completion(String buf, int cursor) {
-    ScalaCompleter c = completor.completer();
-    Candidates ret = c.complete(buf, cursor);
-    return scala.collection.JavaConversions.asJavaList(ret.candidates());
+    return new ArrayList<String>();
   }
 
   private List<File> currentClassPath() {
