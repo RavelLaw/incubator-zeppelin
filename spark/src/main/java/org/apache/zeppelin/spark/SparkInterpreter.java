@@ -440,6 +440,8 @@ public class SparkInterpreter extends Interpreter {
 
     interpreter.createInterpreter();
 
+    interpreter.intp().setContextClassLoader();
+    interpreter.intp().initializeSynchronous();
 
     sc = getSparkContext();
     if (sc.getPoolForName("fair").isEmpty()) {
@@ -459,12 +461,31 @@ public class SparkInterpreter extends Interpreter {
     z = new ZeppelinContext(sc, sqlc, null, dep, printStream,
         Integer.parseInt(getProperty("zeppelin.spark.maxResult")));
 
+    interpreter.intp()
+            .interpret("@transient var _binder = new java.util.HashMap[String, Object]()");
     binder = (Map<String, Object>) getValue("_binder");
     binder.put("sc", sc);
     binder.put("sqlc", sqlc);
     binder.put("z", z);
     binder.put("out", printStream);
 
+    interpreter.intp().interpret("@transient val z = "
+                 + "_binder.get(\"z\").asInstanceOf[org.apache.zeppelin.spark.ZeppelinContext]");
+    interpreter.intp().interpret("@transient val sc = "
+                 + "_binder.get(\"sc\").asInstanceOf[org.apache.spark.SparkContext]");
+    interpreter.intp().interpret("@transient val sqlc = "
+                + "_binder.get(\"sqlc\").asInstanceOf[org.apache.spark.sql.SQLContext]");
+    interpreter.intp().interpret("@transient val sqlContext = "
+                 + "_binder.get(\"sqlc\").asInstanceOf[org.apache.spark.sql.SQLContext]");
+    interpreter.intp().interpret("import org.apache.spark.SparkContext._");
+
+    if (sparkVersion.oldSqlContextImplicits()) {
+      interpreter.intp().interpret("import sqlContext._");
+    } else {
+      interpreter.intp().interpret("import sqlContext.implicits._");
+      interpreter.intp().interpret("import sqlContext.sql");
+      interpreter.intp().interpret("import org.apache.spark.sql.functions._");
+    }
 
     /* Temporary disabling DisplayUtils. see https://issues.apache.org/jira/browse/ZEPPELIN-127
      *
